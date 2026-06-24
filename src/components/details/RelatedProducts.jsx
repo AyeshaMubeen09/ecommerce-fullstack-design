@@ -1,79 +1,183 @@
-import item1 from "../../assets/recommended/item4.jpg";
-import item2 from "../../assets/deals/watch.jpg";
-import item3 from "../../assets/electronics/camera.jpg";
-import item4 from "../../assets/recommended/item6.jpg";
-import item5 from "../../assets/electronics/headphone.jpg";
-import item6 from "../../assets/home/appliance.jpg";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
-const relatedProducts = [
-  {
-    id: 1,
-   name: "Premium Blue Leather Wallet",
-    price: "$24.00 - $39.00",
-    image: item1,
-  },
-  {
-    id: 2,
-  name: "Smart Fitness Watch",
-    price: "$79.00 - $129.00",
-    image: item2,
-  },
-  {
-    id: 3,
-    name: "Wireless Headphones",
-    price: "$99.00 - $179.00",
-    image: item3,
-  },
-  {
-    id: 4,
-     name: "Men's Denim Casual Shorts",
-    price: "$29.00 - $49.00",
-    image: item4,
-  },
-  {
-    id: 5,
-     name: "Electric Water Kettle",
-    price: "$34.00 - $69.00",
-    image: item5,
-  },
-  {
-    id: 6,
-    name: "Orange Travel Sling Bag",
-    price: "$39.00 - $79.00",
-    image: item6,
-  },
-];
+import { getProducts } from "../../api/productApi";
+import productImages from "../../data/productImages";
 
-function RelatedProducts() {
+/**
+ * ==================================================
+ * RelatedProducts
+ * ==================================================
+ * Shows products related to the current product.
+ *
+ * Current Logic:
+ * - Excludes current product
+ * - Prioritizes same category products
+ * - Falls back to other products if needed
+ * - Fully dynamic
+ *
+ * Future Backend Integration:
+ * GET /api/products/:id/related
+ * ==================================================
+ */
+
+function RelatedProducts({ product }) {
+  const [relatedProducts, setRelatedProducts] =
+    useState([]);
+
+  useEffect(() => {
+    const fetchRelatedProducts =
+      async () => {
+        try {
+          const data =
+            await getProducts();
+
+          const currentId =
+            product?._id ||
+            product?.id;
+
+          // =========================
+          // Remove current product
+          // =========================
+          const availableProducts =
+            data.filter(
+              (item) =>
+                (item._id ||
+                  item.id) !==
+                currentId
+            );
+
+          // =========================
+          // Same Category First
+          // =========================
+          const sameCategory =
+            availableProducts.filter(
+              (item) =>
+                item.category ===
+                product?.category
+            );
+
+          // =========================
+          // Fallback Products
+          // =========================
+          const otherProducts =
+            availableProducts.filter(
+              (item) =>
+                item.category !==
+                product?.category
+            );
+
+          // =========================
+          // Final Related Products
+          // =========================
+          const related = [
+            ...sameCategory,
+            ...otherProducts,
+          ].slice(0, 6);
+
+          setRelatedProducts(
+            related
+          );
+        } catch (error) {
+          console.error(
+            "Related products error:",
+            error
+          );
+        }
+      };
+
+    if (product) {
+      fetchRelatedProducts();
+    }
+  }, [product]);
+
+  // =========================
+  // Empty State
+  // =========================
+  if (!relatedProducts.length)
+    return null;
+
   return (
     <div className="bg-white border border-[#DEE2E7] rounded-md p-5">
+      {/* =========================
+          Section Title
+      ========================= */}
       <h2 className="text-[20px] font-semibold text-[#1C1C1C] mb-5">
         Related products
       </h2>
 
-      <div className="grid grid-cols-6 gap-5">
-        {relatedProducts.map((product) => (
-          <div key={product.id}>
-            {/* Image Box */}
-          <div className="h-[172px] border border-[#E3E5E8] rounded-md flex items-center justify-center bg-[#F5F5F5] p-3">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="max-h-[130px] object-contain"
-              />
-            </div>
+      {/* =========================
+          Products Grid
+      ========================= */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-5">
+        {relatedProducts.map(
+          (item) => {
+            const productId =
+              item._id || item.id;
 
-            {/* Product Name */}
-            <h4 className="mt-3 text-[14px] text-[#505050] leading-5 line-clamp-2">
-              {product.name}
-            </h4>
+            const imageSrc =
+              productImages[
+                item.image
+              ] ||
+              item.image ||
+              "";
 
-            {/* Price */}
-            <p className="mt-1 text-[14px] text-[#8B96A5]">
-              {product.price}
-            </p>
-          </div>
-        ))}
+            return (
+              <Link
+                key={productId}
+                to={`/products/${productId}`}
+                className="group"
+              >
+                {/* Product Image */}
+                <div
+                  className="
+                    h-[172px]
+                    border
+                    border-[#E3E5E8]
+                    rounded-md
+                    flex
+                    items-center
+                    justify-center
+                    bg-[#F5F5F5]
+                    p-3
+                    transition
+                    group-hover:border-[#0D6EFD]
+                  "
+                >
+                  <img
+                    src={imageSrc}
+                    alt={item.name}
+                    className="
+                      max-h-[130px]
+                      object-contain
+                    "
+                  />
+                </div>
+
+                {/* Product Name */}
+                <h4
+                  className="
+                    mt-3
+                    text-[14px]
+                    text-[#505050]
+                    leading-5
+                    line-clamp-2
+                  "
+                >
+                  {item.name}
+                </h4>
+
+                {/* Product Price */}
+                <p className="mt-1 text-[14px] font-medium text-[#8B96A5]">
+                  $
+                  {Number(
+                    item.price || 0
+                  ).toFixed(2)}
+                </p>
+              </Link>
+            );
+          }
+        )}
       </div>
     </div>
   );

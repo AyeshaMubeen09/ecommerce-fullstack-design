@@ -1,1 +1,24 @@
 @import "tailwindcss";
+
+.rc-slider-track {
+  background-color: #0d6efd !important;
+}
+
+.rc-slider-rail {
+  background-color: #dee2e7 !important;
+}
+
+.rc-slider-handle {
+  border: 2px solid #0d6efd !important;
+  background: white !important;
+  width: 16px !important;
+  height: 16px !important;
+  margin-top: -6px !important;
+  opacity: 1 !important;
+}
+
+.rc-slider-handle:hover,
+.rc-slider-handle:active {
+  border-color: #0d6efd !important;
+  box-shadow: none !important;
+}

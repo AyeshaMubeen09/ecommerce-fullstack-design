@@ -1,49 +1,102 @@
-import watchImg from "../../assets/deals/watch.jpg";
-import laptopImg from "../../assets/deals/laptop.jpg";
-import cameraImg from "../../assets/deals/camera.jpg";
-import headphoneImg from "../../assets/deals/headphone.jpg";
-import phoneImg from "../../assets/deals/phone.jpg";
+import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+
+import { getProducts } from "../../api/productApi";
+import productImages from "../../data/productImages";
 
 function DealsSection() {
-  const products = [
-    {
-      id: 1,
-      title: "Smart watches",
-      discount: "-25%",
-      image: watchImg,
-    },
-    {
-      id: 2,
-      title: "Laptops",
-      discount: "-15%",
-      image: laptopImg,
-    },
-    {
-      id: 3,
-      title: "GoPro cameras",
-      discount: "-40%",
-      image: cameraImg,
-    },
-    {
-      id: 4,
-      title: "Headphones",
-      discount: "-25%",
-      image: headphoneImg,
-    },
-    {
-      id: 5,
-      title: "Smartphones",
-      discount: "-10%",
-      image: phoneImg,
-    },
-  ];
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [timeLeft, setTimeLeft] = useState({
+    days: 4,
+    hours: 13,
+    minutes: 34,
+    seconds: 56,
+  });
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await getProducts();
+
+        const dealsProducts = data
+          .filter(
+            (product) => product.category === "Deals"
+          )
+          .slice(0, 5);
+
+        setProducts(dealsProducts);
+      } catch (error) {
+        console.error(
+          "Deals Section Error:",
+          error
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    const targetDate = new Date();
+    targetDate.setDate(
+      targetDate.getDate() + 4
+    );
+
+    const timer = setInterval(() => {
+      const now = new Date();
+      const difference =
+        targetDate.getTime() - now.getTime();
+
+      if (difference <= 0) {
+        clearInterval(timer);
+
+        setTimeLeft({
+          days: 0,
+          hours: 0,
+          minutes: 0,
+          seconds: 0,
+        });
+
+        return;
+      }
+
+      setTimeLeft({
+        days: Math.floor(
+          difference /
+            (1000 * 60 * 60 * 24)
+        ),
+        hours: Math.floor(
+          (difference %
+            (1000 * 60 * 60 * 24)) /
+            (1000 * 60 * 60)
+        ),
+        minutes: Math.floor(
+          (difference %
+            (1000 * 60 * 60)) /
+            (1000 * 60)
+        ),
+        seconds: Math.floor(
+          (difference % (1000 * 60)) /
+            1000
+        ),
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  if (loading) return null;
 
   return (
     <section className="max-w-7xl mx-auto px-0 md:px-4 mt-6">
       <div className="bg-white border-y md:border border-[#DEE2E7] md:rounded-md overflow-hidden">
         <div className="lg:grid lg:grid-cols-[280px_1fr]">
 
-          {/* MOBILE HEADER */}
+          {/* Mobile Header */}
           <div className="lg:hidden flex items-center justify-between px-4 py-4 border-b border-[#DEE2E7]">
             <div>
               <h2 className="text-[18px] font-semibold text-[#1C1C1C] leading-none">
@@ -57,9 +110,24 @@ function DealsSection() {
 
             <div className="flex gap-1">
               {[
-                ["13", "Hour"],
-                ["34", "Min"],
-                ["56", "Sec"],
+                [
+                  String(
+                    timeLeft.hours
+                  ).padStart(2, "0"),
+                  "Hour",
+                ],
+                [
+                  String(
+                    timeLeft.minutes
+                  ).padStart(2, "0"),
+                  "Min",
+                ],
+                [
+                  String(
+                    timeLeft.seconds
+                  ).padStart(2, "0"),
+                  "Sec",
+                ],
               ].map(([value, label]) => (
                 <div
                   key={label}
@@ -77,7 +145,7 @@ function DealsSection() {
             </div>
           </div>
 
-          {/* DESKTOP LEFT SIDE */}
+          {/* Desktop Left Side */}
           <div className="hidden lg:block p-5 border-r border-[#DEE2E7]">
             <h2 className="text-[20px] font-semibold text-[#1C1C1C]">
               Deals and offers
@@ -89,10 +157,30 @@ function DealsSection() {
 
             <div className="flex gap-1 mt-5">
               {[
-                ["04", "Days"],
-                ["13", "Hour"],
-                ["34", "Min"],
-                ["56", "Sec"],
+                [
+                  String(
+                    timeLeft.days
+                  ).padStart(2, "0"),
+                  "Days",
+                ],
+                [
+                  String(
+                    timeLeft.hours
+                  ).padStart(2, "0"),
+                  "Hour",
+                ],
+                [
+                  String(
+                    timeLeft.minutes
+                  ).padStart(2, "0"),
+                  "Min",
+                ],
+                [
+                  String(
+                    timeLeft.seconds
+                  ).padStart(2, "0"),
+                  "Sec",
+                ],
               ].map(([value, label]) => (
                 <div
                   key={label}
@@ -110,72 +198,77 @@ function DealsSection() {
             </div>
           </div>
 
-          {/* MOBILE SCROLL STRIP */}
-          <div className="lg:hidden overflow-x-auto">
+          {/* Mobile Products */}
+          <div className="lg:hidden overflow-x-auto scrollbar-hide">
             <div className="flex min-w-max">
               {products.map((product) => (
-                <div
-                  key={product.id}
-                  className="
-                    w-[148px]
-                    shrink-0
-                    border-r
-                    border-[#DEE2E7]
-                    flex
-                    flex-col
-                    items-center
-                    py-5
-                    px-3
-                  "
+                <Link
+                  key={product._id}
+                  to={`/products/${product._id}`}
+                  className="w-[148px] shrink-0 border-r border-[#DEE2E7] flex flex-col items-center py-5 px-3 hover:bg-gray-50 transition"
                 >
                   <div className="h-[95px] flex items-center justify-center">
                     <img
-                      src={product.image}
-                      alt={product.title}
+                      src={
+                        productImages[
+                          product.image
+                        ] || product.image
+                      }
+                      alt={product.name}
                       className="max-h-[75px] object-contain"
                     />
                   </div>
 
-                  <h3 className="mt-3 text-[14px] text-center text-[#1C1C1C]">
-                    {product.title}
+                  <h3 className="mt-3 text-[14px] text-center text-[#1C1C1C] line-clamp-2">
+                    {product.name}
                   </h3>
 
                   <span className="mt-3 px-4 py-1 rounded-full bg-[#FFE3E3] text-[#EB001B] text-[13px] font-medium">
-                    {product.discount}
+                    {product.discount ||
+                      "-25%"}
                   </span>
-                </div>
+                </Link>
               ))}
             </div>
           </div>
 
-          {/* DESKTOP PRODUCTS */}
+          {/* Desktop Products */}
           <div className="hidden lg:grid lg:grid-cols-5">
-            {products.map((product, index) => (
-              <div
-                key={product.id}
-                className={`flex flex-col items-center justify-center py-5 px-4 ${
-                  index !== products.length - 1
-                    ? "border-r border-[#DEE2E7]"
-                    : ""
-                }`}
-              >
-                <div className="h-[140px] flex items-center justify-center">
-                  <img
-                    src={product.image}
-                    alt={product.title}
-                    className="max-h-[120px] max-w-[120px] object-contain"
-                  />
-                </div>
+            {products.map(
+              (product, index) => (
+                <Link
+                  key={product._id}
+                  to={`/products/${product._id}`}
+                  className={`flex flex-col items-center justify-center py-5 px-4 hover:bg-gray-50 transition ${
+                    index !==
+                    products.length - 1
+                      ? "border-r border-[#DEE2E7]"
+                      : ""
+                  }`}
+                >
+                  <div className="h-[140px] flex items-center justify-center">
+                    <img
+                      src={
+                        productImages[
+                          product.image
+                        ] || product.image
+                      }
+                      alt={product.name}
+                      className="max-h-[120px] max-w-[120px] object-contain"
+                    />
+                  </div>
 
-                <h3 className="mt-3 text-[15px] text-center text-[#1C1C1C]">
-                  {product.title}
-                </h3>
+                  <h3 className="mt-3 text-[15px] text-center text-[#1C1C1C] line-clamp-2">
+                    {product.name}
+                  </h3>
 
-                <span className="mt-2 px-3 py-1 rounded-full bg-[#FFE3E3] text-[#EB001B] text-[13px] font-medium">
-                  {product.discount}
-                </span>
-              </div>
-            ))}
+                  <span className="mt-2 px-3 py-1 rounded-full bg-[#FFE3E3] text-[#EB001B] text-[13px] font-medium">
+                    {product.discount ||
+                      "-25%"}
+                  </span>
+                </Link>
+              )
+            )}
           </div>
 
         </div>

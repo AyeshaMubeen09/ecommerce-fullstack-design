@@ -1,8 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import logo from "../../assets/logo/logo.svg";
 import ReactCountryFlag from "react-country-flag";
 
-import { Link } from "react-router-dom";
+import { getProducts } from "../../api/productApi";
+
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
+
 import {
   User,
   MessageSquare,
@@ -15,19 +21,75 @@ import {
 } from "lucide-react";
 
 function Navbar() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] =
+    useState(false);
 
-  const categories = [
-    "Automobiles",
-    "Clothes and wear",
-    "Home interiors",
-    "Computer and tech",
-    "Tools, equipments",
-    "Sports and outdoor",
-    "Animal and pets",
-    "Machinery tools",
-    "More category",
-  ];
+  const [searchInput, setSearchInput] =
+    useState("");
+
+  const [categories, setCategories] =
+    useState(["All category"]);
+
+  const [selectedCategory, setSelectedCategory] =
+    useState("All category");
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const products = await getProducts();
+
+        const uniqueCategories = [
+          ...new Set(
+            products.flatMap((product) =>
+              product.category
+                ? product.category
+                    .split(",")
+                    .map((c) => c.trim())
+                : []
+            )
+          ),
+        ].sort();
+
+        setCategories([
+          "All category",
+          ...uniqueCategories,
+        ]);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const handleSearch = () => {
+    const params =
+      new URLSearchParams();
+
+    if (searchInput.trim()) {
+      params.set(
+        "search",
+        searchInput.trim()
+      );
+    }
+
+    if (
+      selectedCategory !==
+      "All category"
+    ) {
+      params.set(
+        "category",
+        selectedCategory
+      );
+    }
+
+    navigate(
+      `/products?${params.toString()}`
+    );
+  };
+
 
   return (
     <>
@@ -78,21 +140,48 @@ function Navbar() {
             </Link>
 
             {/* Desktop Search */}
-            <div className="hidden md:flex flex-1 max-w-[680px] h-[40px]">
-              <input
-                type="text"
-                placeholder="Search"
-                className="flex-1 border border-[#0D6EFD] px-4 text-sm outline-none rounded-l-md"
-              />
+           <div className="hidden md:flex flex-1 max-w-[680px] h-[40px]">
+  <input
+    type="text"
+    value={searchInput}
+    onChange={(e) =>
+      setSearchInput(e.target.value)
+    }
+    onKeyDown={(e) => {
+      if (e.key === "Enter") {
+        handleSearch();
+      }
+    }}
+    placeholder="Search"
+    className="flex-1 border border-[#0D6EFD] px-4 text-sm outline-none rounded-l-md"
+  />
 
-              <select className="w-[145px] border-y border-r border-[#0D6EFD] text-sm px-3 outline-none">
-                <option>All category</option>
-              </select>
+<select
+  value={selectedCategory}
+  onChange={(e) =>
+    setSelectedCategory(
+      e.target.value
+    )
+  }
+  className="w-[145px] border-y border-r border-[#0D6EFD] text-sm px-3 outline-none"
+>
+  {categories.map((category) => (
+    <option
+      key={category}
+      value={category}
+    >
+      {category}
+    </option>
+  ))}
+</select>
 
-              <button className="w-[100px] bg-[#0D6EFD] text-white text-sm font-medium rounded-r-md">
-                Search
-              </button>
-            </div>
+  <button
+    onClick={handleSearch}
+    className="w-[100px] bg-[#0D6EFD] text-white text-sm font-medium rounded-r-md"
+  >
+    Search
+  </button>
+</div>
 
             {/* Desktop Actions */}
             <div className="hidden lg:flex items-center gap-7 text-[#8B96A5]">
