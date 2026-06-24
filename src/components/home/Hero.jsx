@@ -1,42 +1,48 @@
+import { Link } from "react-router-dom";
+
 import heroBanner from "../../assets/home/hero-banner.jpg";
 import userImage from "../../assets/profile/user.jpg";
 
-import { Link } from "react-router-dom";
+// Hero category links
+const categories = [
+  "Automobiles",
+  "Clothes and wear",
+  "Home interiors",
+  "Computer and tech",
+  "Tools, equipments",
+  "Sports and outdoor",
+  "Animal and pets",
+  "Machinery tools",
+  "More category",
+];
 
 function Hero() {
-  const categories = [
-    "Automobiles",
-    "Clothes and wear",
-    "Home interiors",
-    "Computer and tech",
-    "Tools, equipments",
-    "Sports and outdoor",
-    "Animal and pets",
-    "Machinery tools",
-    "More category",
-  ];
-
   return (
     <section className="max-w-7xl mx-auto px-0 md:px-4 mt-3 md:mt-5">
       <div className="bg-transparent md:bg-white md:border md:border-[#DEE2E7] rounded-none md:rounded-md p-0 md:p-3">
         <div className="grid lg:grid-cols-[250px_1fr_200px] gap-4">
-          {/* Categories */}
+
+          {/* =========================
+              LEFT SIDEBAR CATEGORIES
+          ========================== */}
           <div className="hidden lg:block">
             <ul className="space-y-1">
-              {categories.map((item) => (
+              {categories.map((category) => (
                 <Link
-                  key={item}
+                  key={category}
                   to="/products"
                 >
-                  <li className="px-3 py-2 rounded cursor-pointer hover:bg-[#F7FAFC]">
-                    {item}
+                  <li className="px-3 py-2 rounded cursor-pointer hover:bg-[#F7FAFC] transition">
+                    {category}
                   </li>
                 </Link>
               ))}
             </ul>
           </div>
 
-          {/* Hero Banner */}
+          {/* =========================
+              HERO BANNER
+          ========================== */}
           <div
             className="
               relative
@@ -53,8 +59,10 @@ function Hero() {
               backgroundImage: `url(${heroBanner})`,
             }}
           >
+            {/* Overlay */}
             <div className="absolute inset-0 bg-gradient-to-r from-white/80 via-white/40 to-transparent" />
 
+            {/* Banner Content */}
             <div className="relative z-10 px-5 py-6 md:px-8 md:py-10 lg:px-10 lg:py-12">
               <p className="text-[18px] md:text-[24px] lg:text-[28px] text-[#1C1C1C]">
                 Latest trending
@@ -64,15 +72,34 @@ function Hero() {
                 Electronic items
               </h2>
 
-              {/* Desktop only */}
-              <button className="hidden md:block mt-6 bg-white border border-[#DEE2E7] px-6 py-2 rounded-md font-medium hover:bg-gray-50 transition">
-                Learn more
-              </button>
+              {/* Desktop CTA */}
+              <Link
+  to="/products"
+  className="
+    hidden
+    md:inline-flex
+    mt-6
+    bg-white
+    border
+    border-[#DEE2E7]
+    px-6
+    py-2
+    rounded-md
+    font-medium
+    hover:bg-gray-50
+    transition
+  "
+>
+  Learn more
+</Link>
             </div>
           </div>
 
-          {/* Right Side */}
+          {/* =========================
+              RIGHT SIDE PROMOTION AREA
+          ========================== */}
           <div className="hidden lg:flex flex-col gap-3">
+
             {/* User Card */}
             <div className="bg-[#E3F0FF] rounded-md p-4">
               <div className="flex items-center gap-3">
@@ -88,7 +115,7 @@ function Hero() {
                   </p>
 
                   <p className="text-sm text-[#1C1C1C]">
-                    <b>let's get started</b>
+                    <b>Let's get started</b>
                   </p>
                 </div>
               </div>
@@ -102,7 +129,7 @@ function Hero() {
               </button>
             </div>
 
-            {/* Orange Card */}
+            {/* Promotion Card 1 */}
             <div className="bg-[#F38332] rounded-md p-4 text-white min-h-[95px] flex flex-col justify-center">
               <h3 className="font-medium text-[16px]">
                 Get US $10 off
@@ -113,7 +140,7 @@ function Hero() {
               </p>
             </div>
 
-            {/* Teal Card */}
+            {/* Promotion Card 2 */}
             <div className="bg-[#55BDC3] rounded-md p-4 text-white min-h-[95px] flex flex-col justify-center">
               <h3 className="font-medium text-[16px]">
                 Send quotes with
@@ -123,6 +150,7 @@ function Hero() {
                 supplier preferences
               </p>
             </div>
+
           </div>
         </div>
       </div>
