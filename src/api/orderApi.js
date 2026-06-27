@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API =
-  "https://ecommerce-fullstack-design-production-a246.up.railway.app";
+  "https://ecommerce-fullstack-design-production-a246.up.railway.app/api/orders";
 
 const getAuthConfig = () => {
   const userInfo = JSON.parse(
@@ -10,7 +10,7 @@ const getAuthConfig = () => {
 
   return {
     headers: {
-      Authorization: `Bearer ${userInfo.token}`,
+      Authorization: `Bearer ${userInfo?.token}`,
     },
   };
 };
