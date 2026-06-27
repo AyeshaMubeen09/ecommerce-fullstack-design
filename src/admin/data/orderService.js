@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const API = "https://ecommerce-fullstack-design-production-a246.up.railway.app";
-
+const API =
+  "https://ecommerce-fullstack-design-production-a246.up.railway.app/api/orders";
 /* =========================
     AUTH CONFIG
 ========================= */

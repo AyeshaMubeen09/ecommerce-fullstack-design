@@ -33,6 +33,11 @@ function AdminDashboard() {
         const data =
           await getProducts();
 
+console.log(data);
+console.log(Array.isArray(data));
+
+setProducts(data);
+
         setProducts(data);
       } catch (err) {
         console.error(err);

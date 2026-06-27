@@ -1,16 +1,13 @@
 import axios from "axios";
 
 const API_URL =
-  "https://ecommerce-fullstack-design-production-a246.up.railway.app";
+  "https://ecommerce-fullstack-design-production-a246.up.railway.app/api/products";
 
 /* =========================
    GET ALL PRODUCTS
 ========================= */
 export const getProducts = async () => {
-  const { data } = await axios.get(
-    API_URL
-  );
-
+  const { data } = await axios.get(API_URL);
   return data;
 };
 
