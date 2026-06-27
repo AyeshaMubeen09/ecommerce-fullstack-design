@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 
 import MainLayout from "../layouts/MainLayout";
@@ -9,6 +13,8 @@ import CartSummary from "../components/cart/CartSummary";
 import CartFeatures from "../components/cart/CartFeatures";
 import SavedForLater from "../components/cart/SavedForLater";
 import DiscountBanner from "../components/cart/DiscountBanner";
+import { createOrder } from "../api/orderApi";
+
 
 
 /**
@@ -35,7 +41,7 @@ function Cart() {
 // =========================================
 // State
 // =========================================
-
+const navigate = useNavigate();
 const [cartItems, setCartItems] =
   useState(() => {
     try {
@@ -54,6 +60,22 @@ const [cartItems, setCartItems] =
     }
   });
 
+const location = useLocation();
+
+useEffect(() => {
+  if (location.hash === "#saved") {
+    const element =
+      document.getElementById("saved");
+
+    if (element) {
+      element.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }
+}, [location]);
+
 const [wishlistItems, setWishlistItems] =
   useState(() => {
     try {
@@ -71,6 +93,92 @@ const [wishlistItems, setWishlistItems] =
       return [];
     }
   });
+
+  //checkout 
+
+const checkoutHandler = async () => {
+  if (cartItems.length === 0) {
+    alert("Your cart is empty.");
+    return;
+  }
+
+  try {
+    const subtotal = cartItems.reduce(
+      (sum, item) =>
+        sum +
+        Number(item.price) *
+          Number(item.qty || 1),
+      0
+    );
+
+    const shippingPrice = 0;
+
+    const taxPrice = subtotal * 0.1;
+
+    const totalPrice =
+      subtotal +
+      shippingPrice +
+      taxPrice;
+
+    const orderData = {
+      items: cartItems.map((item) => ({
+        product:
+          item._id || item.id,
+
+        name: item.name,
+
+        image: item.image,
+
+        price: item.price,
+
+        quantity:
+          item.qty || 1,
+      })),
+
+      shippingAddress: {
+        fullName: "Customer",
+        address: "123 Main Street",
+        city: "Islamabad",
+        postalCode: "44000",
+        country: "Pakistan",
+        phone: "+92 300 0000000",
+      },
+
+      paymentMethod:
+        "Cash on Delivery",
+
+      subtotal,
+
+      shippingPrice,
+
+      taxPrice,
+
+      totalPrice,
+    };
+
+    await createOrder(orderData);
+
+    setCartItems([]);
+
+   localStorage.setItem(
+  "cart",
+  JSON.stringify([])
+);
+
+    alert(
+      "Order placed successfully!"
+    );
+
+    navigate("/orders");
+  } catch (error) {
+    console.error(error);
+
+    alert(
+      error.response?.data?.message ||
+        "Failed to place order."
+    );
+  }
+};
 
   // =========================================
   // Wishlist Actions
@@ -213,7 +321,10 @@ useEffect(() => {
           onSaveForLater={saveForLater}
           />
 
-          <CartSummary cartItems={cartItems} />
+          <CartSummary
+  cartItems={cartItems}
+  onCheckout={checkoutHandler}
+/>
         </div>
 
         {/* =========================================
@@ -227,11 +338,13 @@ useEffect(() => {
         {/* =========================================
             SAVED FOR LATER / WISHLIST
         ========================================= */}
+        <div id="saved">
         <SavedForLater
         wishlistItems={wishlistItems}
         onRemoveWishlist={removeWishlistItem}
         onMoveToCart={moveToCart}
         />
+        </div>
 
         {/* =========================================
             PROMOTIONAL BANNER

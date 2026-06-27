@@ -122,4 +122,8 @@ const productImages = {
 "item10.jpg": item10,
 };
 
+export const getProductImage = (image) => {
+  return productImages[image] || image;
+};
+
 export default productImages;

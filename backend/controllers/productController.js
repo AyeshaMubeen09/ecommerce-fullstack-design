@@ -99,10 +99,64 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+//export
+
+const exportProducts = async (req, res) => {
+  try {
+    const products = await Product.find();
+
+    const csvRows = [];
+
+    csvRows.push(
+      [
+        "Name",
+        "Category",
+        "Price",
+        "Stock",
+        "Brand",
+        "Free Shipping",
+      ].join(",")
+    );
+
+    products.forEach((product) => {
+      csvRows.push(
+        [
+          `"${product.name}"`,
+          `"${product.category}"`,
+          product.price,
+          product.stock,
+          `"${product.brand}"`,
+          product.freeShipping
+            ? "Yes"
+            : "No",
+        ].join(",")
+      );
+    });
+
+    const csv = csvRows.join("\n");
+
+    res.header(
+      "Content-Type",
+      "text/csv"
+    );
+
+    res.attachment(
+      `products-${Date.now()}.csv`
+    );
+
+    return res.send(csv);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   createProduct,
   getProducts,
   getProductById,
   updateProduct,
   deleteProduct,
+  exportProducts,
 };

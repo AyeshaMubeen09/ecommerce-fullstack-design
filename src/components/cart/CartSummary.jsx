@@ -26,7 +26,10 @@ import { useState } from "react";
  * POST /api/orders/checkout
  * ==================================================
  */
-function CartSummary({ cartItems = [] }) {
+function CartSummary({
+  cartItems,
+  onCheckout,
+}) {
   // =========================
   // Calculations
   // =========================
@@ -172,20 +175,22 @@ function CartSummary({ cartItems = [] }) {
           </div>
 
           {/* Checkout */}
-          <button
-            className="
-              w-full
-              h-[48px]
-              mt-5
-              rounded-md
-              bg-[#00B517]
-              text-white
-              text-[16px]
-              font-medium
-            "
-          >
-            Checkout
-          </button>
+<button
+  onClick={onCheckout}
+  disabled={cartItems.length === 0}
+  className="
+    w-full
+    h-[54px]
+    rounded-lg
+    bg-[#0D6EFD]
+    text-white
+    font-semibold
+    disabled:bg-gray-300
+    disabled:cursor-not-allowed
+  "
+>
+  Checkout
+</button>
 
           {/* Payment Methods */}
           <div className="flex justify-center gap-2 mt-5">
@@ -277,20 +282,24 @@ function CartSummary({ cartItems = [] }) {
         </div>
 
         {/* Checkout */}
-        <button
-          className="
-            w-full
-            h-[52px]
-            mt-5
-            rounded-md
-            bg-[#00B517]
-            text-white
-            text-[18px]
-            font-medium
-          "
-        >
-          Checkout ({totalItems} items)
-        </button>
+<button
+  onClick={onCheckout}
+  disabled={cartItems.length === 0}
+  className="
+    w-full
+    h-[52px]
+    mt-5
+    rounded-md
+    bg-[#00B517]
+    text-white
+    text-[18px]
+    font-medium
+    disabled:bg-gray-300
+    disabled:cursor-not-allowed
+  "
+>
+  Checkout ({totalItems} items)
+</button>
       </div>
     </>
   );

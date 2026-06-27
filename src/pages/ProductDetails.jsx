@@ -72,6 +72,49 @@ function ProductDetails() {
   const [isInCart, setIsInCart] =
   useState(false);
 
+  /* =========================
+    USER STATE
+========================= */
+
+const [userInfo, setUserInfo] =
+  useState(() => {
+    return JSON.parse(
+      localStorage.getItem("userInfo")
+    );
+  });
+
+useEffect(() => {
+  const syncUser = () => {
+    setUserInfo(
+      JSON.parse(
+        localStorage.getItem("userInfo")
+      )
+    );
+  };
+
+  window.addEventListener(
+    "storage",
+    syncUser
+  );
+
+  window.addEventListener(
+    "focus",
+    syncUser
+  );
+
+  return () => {
+    window.removeEventListener(
+      "storage",
+      syncUser
+    );
+
+    window.removeEventListener(
+      "focus",
+      syncUser
+    );
+  };
+}, []);
+
   // =========================
   // Fetch Product
   // =========================
@@ -194,6 +237,18 @@ const handleAddToCart = () => {
   alert("Product added to cart");
 };
 
+/* =========================
+    BACK BUTTON
+========================= */
+
+const handleBack = () => {
+  if (window.history.length > 1) {
+    navigate(-1);
+  } else {
+    navigate("/products");
+  }
+};
+
   // =========================
   // Loading State
   // =========================
@@ -245,42 +300,59 @@ const handleAddToCart = () => {
       hideNavbarMobile
       hideFooterMobile
     >
-      {/* =========================================
-          MOBILE HEADER
-      ========================================= */}
-      <div className="lg:hidden sticky top-0 z-50 bg-white border-b border-[#DEE2E7]">
-        <div className="h-[56px] px-4 flex items-center justify-between">
-          <button
-            onClick={() =>
-              navigate("/products")
-            }
-            className="flex items-center"
-          >
-            <ArrowLeft size={22} />
-          </button>
+{/* =========================================
+    MOBILE HEADER
+========================================= */}
+<div className="lg:hidden sticky top-0 z-50 bg-white border-b border-[#DEE2E7]">
+  <div className="h-[56px] px-4 flex items-center justify-between">
 
-          <h1
-            className="
-              flex-1
-              text-center
-              px-3
-              text-[16px]
-              font-semibold
-              truncate
-            "
-          >
-            {product.name}
-          </h1>
+    {/* Back */}
+    <button
+      onClick={handleBack}
+      className="flex items-center active:scale-95"
+    >
+      <ArrowLeft size={22} />
+    </button>
 
-          <div className="flex items-center gap-4">
-            <Link to="/cart">
-              <ShoppingCart size={22} />
-            </Link>
+    {/* Product Name */}
+    <h1
+      className="
+        flex-1
+        text-center
+        px-3
+        text-[16px]
+        font-semibold
+        truncate
+      "
+    >
+      {product.name}
+    </h1>
 
-            <User size={22} />
-          </div>
-        </div>
-      </div>
+    {/* Actions */}
+    <div className="flex items-center gap-4">
+
+      <Link
+        to="/cart"
+        className="hover:text-[#0D6EFD]"
+      >
+        <ShoppingCart size={22} />
+      </Link>
+
+      <Link
+        to={
+          userInfo
+            ? "/profile"
+            : "/login"
+        }
+        className="hover:text-[#0D6EFD]"
+      >
+        <User size={22} />
+      </Link>
+
+    </div>
+
+  </div>
+</div>
 
       {/* =========================================
           PAGE CONTENT

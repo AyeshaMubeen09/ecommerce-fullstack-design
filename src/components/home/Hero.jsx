@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 import heroBanner from "../../assets/home/hero-banner.jpg";
 import userImage from "../../assets/profile/user.jpg";
@@ -17,6 +18,21 @@ const categories = [
 ];
 
 function Hero() {
+  const [userInfo, setUserInfo] = useState(null);
+
+  useEffect(() => {
+    const user = JSON.parse(
+      localStorage.getItem("userInfo") || "null"
+    );
+
+    setUserInfo(user);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("userInfo");
+    window.location.reload();
+  };
+
   return (
     <section className="max-w-7xl mx-auto px-0 md:px-4 mt-3 md:mt-5">
       <div className="bg-transparent md:bg-white md:border md:border-[#DEE2E7] rounded-none md:rounded-md p-0 md:p-3">
@@ -24,7 +40,7 @@ function Hero() {
 
           {/* =========================
               LEFT SIDEBAR CATEGORIES
-          ========================== */}
+          ========================= */}
           <div className="hidden lg:block">
             <ul className="space-y-1">
               {categories.map((category) => (
@@ -42,7 +58,7 @@ function Hero() {
 
           {/* =========================
               HERO BANNER
-          ========================== */}
+          ========================= */}
           <div
             className="
               relative
@@ -72,32 +88,31 @@ function Hero() {
                 Electronic items
               </h2>
 
-              {/* Desktop CTA */}
               <Link
-  to="/products"
-  className="
-    hidden
-    md:inline-flex
-    mt-6
-    bg-white
-    border
-    border-[#DEE2E7]
-    px-6
-    py-2
-    rounded-md
-    font-medium
-    hover:bg-gray-50
-    transition
-  "
->
-  Learn more
-</Link>
+                to="/products"
+                className="
+                  hidden
+                  md:inline-flex
+                  mt-6
+                  bg-white
+                  border
+                  border-[#DEE2E7]
+                  px-6
+                  py-2
+                  rounded-md
+                  font-medium
+                  hover:bg-gray-50
+                  transition
+                "
+              >
+                Learn more
+              </Link>
             </div>
           </div>
 
           {/* =========================
               RIGHT SIDE PROMOTION AREA
-          ========================== */}
+          ========================= */}
           <div className="hidden lg:flex flex-col gap-3">
 
             {/* User Card */}
@@ -111,22 +126,82 @@ function Hero() {
 
                 <div>
                   <p className="text-sm text-[#1C1C1C]">
-                    <b>Hi, user</b>
+                    <b>
+                      Hi,{" "}
+                      {userInfo
+                        ? userInfo.name
+                        : "User"}
+                    </b>
                   </p>
 
                   <p className="text-sm text-[#1C1C1C]">
-                    <b>Let's get started</b>
+                    <b>
+                      {userInfo
+                        ? "Welcome back"
+                        : "Let's get started"}
+                    </b>
                   </p>
                 </div>
               </div>
 
-              <button className="w-full mt-4 h-[40px] bg-[#0D6EFD] text-white rounded-md text-sm font-medium hover:bg-[#005ade] transition">
-                Join now
-              </button>
+              {userInfo ? (
+                <button
+                  onClick={handleLogout}
+                  className="
+                    w-full
+                    mt-4
+                    h-[40px]
+                    bg-[#28A745]
+                    text-white
+                    rounded-md
+                    text-sm
+                    font-medium
+                  "
+                >
+                  Logout
+                </button>
+              ) : (
+                <>
+                  <Link
+                    to="/register"
+                    className="
+                      w-full
+                      mt-4
+                      h-[40px]
+                      bg-[#0D6EFD]
+                      text-white
+                      rounded-md
+                      text-sm
+                      font-medium
+                      flex
+                      items-center
+                      justify-center
+                    "
+                  >
+                    Join now
+                  </Link>
 
-              <button className="w-full mt-2 h-[40px] bg-white border border-[#DEE2E7] rounded-md text-sm font-medium hover:bg-gray-50 transition">
-                Log in
-              </button>
+                  <Link
+                    to="/login"
+                    className="
+                      w-full
+                      mt-2
+                      h-[40px]
+                      bg-white
+                      border
+                      border-[#DEE2E7]
+                      rounded-md
+                      text-sm
+                      font-medium
+                      flex
+                      items-center
+                      justify-center
+                    "
+                  >
+                    Log in
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Promotion Card 1 */}

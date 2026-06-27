@@ -51,6 +51,7 @@ function SavedForLater({
       ========================================= */}
       <div className="hidden lg:block bg-white border border-[#DEE2E7] rounded-md p-5 mt-8">
         {/* Section Title */}
+        <div id="saved">
         <h2 className="text-[20px] font-semibold text-[#1C1C1C] mb-5">
           Saved for later
         </h2>
@@ -222,6 +223,7 @@ function SavedForLater({
             </div>
           ))}
         </div>
+      </div>
       </div>
     </>
   );

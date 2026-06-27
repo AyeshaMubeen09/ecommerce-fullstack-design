@@ -1,5 +1,9 @@
 import { useEffect, useState, useMemo } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 
 import {
   ArrowLeft,
@@ -34,6 +38,7 @@ function Products() {
 
   const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [savedItems, setSavedItems] = useState([]);
+  const navigate = useNavigate();
 
   /* =========================
      UI STATE
@@ -64,6 +69,45 @@ function Products() {
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(999999);
   const [toast, setToast] = useState("");
+
+    const [userInfo, setUserInfo] =
+    useState(() => {
+      return JSON.parse(
+        localStorage.getItem("userInfo")
+      );
+    });
+
+  useEffect(() => {
+    const syncUser = () => {
+      setUserInfo(
+        JSON.parse(
+          localStorage.getItem("userInfo")
+        )
+      );
+    };
+
+    window.addEventListener(
+      "storage",
+      syncUser
+    );
+
+    window.addEventListener(
+      "focus",
+      syncUser
+    );
+
+    return () => {
+      window.removeEventListener(
+        "storage",
+        syncUser
+      );
+
+      window.removeEventListener(
+        "focus",
+        syncUser
+      );
+    };
+  }, []);
 
   /* =========================
      URL CATEGORY SYNC
@@ -332,6 +376,43 @@ const handleToggleSave = (product) => {
 };
 
   /* =========================
+      BACK BUTTON
+  ========================= */
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+    } else {
+      navigate("/products");
+    }
+  };
+
+  /* =========================
+    MOBILE CATEGORY SELECT
+========================= */
+
+const handleCategorySelect = (
+  category
+) => {
+  const params =
+    new URLSearchParams(searchParams);
+
+  if (
+    selectedCategories.includes(category)
+  ) {
+    params.delete("category");
+    setSelectedCategories([]);
+  } else {
+    params.set("category", category);
+    setSelectedCategories([category]);
+  }
+
+  navigate(
+    `/products?${params.toString()}`
+  );
+};
+
+  /* =========================
      RENDER
   ========================= */
   return (
@@ -342,47 +423,73 @@ const handleToggleSave = (product) => {
 
         {/* Header */}
         <div className="bg-white px-4 pt-4 pb-3">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <Link to="/">
-                <ArrowLeft size={22} />
-              </Link>
+<div className="flex justify-between items-center">
 
-              <h1 className="font-semibold text-[20px]">
-                {selectedCategories[0] || "All Products"}
-              </h1>
-            </div>
+  <div className="flex items-center gap-3">
 
-            <div className="flex gap-5">
-              <Link to="/cart">
-                <ShoppingCart size={22} />
-              </Link>
-              <User size={22} />
-            </div>
-          </div>
+    <button
+      onClick={handleBack}
+      className="active:scale-95"
+    >
+      <ArrowLeft size={22} />
+    </button>
 
-          {/* Category Pills */}
-          <div className="flex gap-2 overflow-x-auto mt-4 pb-1 scrollbar-hide">
-            {categories.map((item) => (
-              <button
-                key={item}
-                onClick={() =>
-                  setSelectedCategories(
-                    selectedCategories.includes(item)
-                      ? []
-                      : [item]
-                  )
-                }
-                className={`shrink-0 h-[40px] px-4 rounded-md text-[15px] font-medium ${
-                  selectedCategories.includes(item)
-                    ? "bg-[#0D6EFD] text-white"
-                    : "bg-[#EFF2F4] text-[#0D6EFD]"
-                }`}
-              >
-                {item}
-              </button>
-            ))}
-          </div>
+    <h1 className="font-semibold text-[20px]">
+      {selectedCategories[0] ||
+        "All Products"}
+    </h1>
+
+  </div>
+
+  <div className="flex gap-5">
+
+    <Link to="/cart">
+      <ShoppingCart size={22} />
+    </Link>
+
+    <Link
+      to={
+        userInfo
+          ? "/profile"
+          : "/login"
+      }
+    >
+      <User size={22} />
+    </Link>
+
+  </div>
+
+</div>
+
+{/* =========================
+    CATEGORY PILLS
+========================= */}
+<div className="flex gap-2 overflow-x-auto mt-4 pb-1 scrollbar-hide">
+  {categories.map((item) => (
+    <button
+      key={item}
+      onClick={() =>
+        handleCategorySelect(item)
+      }
+      className={`
+        shrink-0
+        h-[40px]
+        px-4
+        rounded-md
+        text-[15px]
+        font-medium
+        transition-colors
+        ${
+          selectedCategories.includes(item)
+            ? "bg-[#0D6EFD] text-white"
+            : "bg-[#EFF2F4] text-[#0D6EFD]"
+        }
+      `}
+    >
+      {item}
+    </button>
+  ))}
+</div>
         </div>
 
         {/* Toolbar */}

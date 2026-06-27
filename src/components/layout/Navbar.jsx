@@ -21,6 +21,12 @@ import {
 } from "lucide-react";
 
 function Navbar() {
+  /* =========================
+      STATE
+  ========================= */
+
+  const navigate = useNavigate();
+
   const [mobileMenuOpen, setMobileMenuOpen] =
     useState(false);
 
@@ -33,12 +39,57 @@ function Navbar() {
   const [selectedCategory, setSelectedCategory] =
     useState("All category");
 
-  const navigate = useNavigate();
+  const [userInfo, setUserInfo] = useState(() => {
+    return JSON.parse(
+      localStorage.getItem("userInfo")
+    );
+  });
+
+  /* =========================
+      KEEP USER INFO UPDATED
+  ========================= */
+
+  useEffect(() => {
+    const syncUser = () => {
+      setUserInfo(
+        JSON.parse(
+          localStorage.getItem("userInfo")
+        )
+      );
+    };
+
+    window.addEventListener(
+      "storage",
+      syncUser
+    );
+
+    window.addEventListener(
+      "focus",
+      syncUser
+    );
+
+    return () => {
+      window.removeEventListener(
+        "storage",
+        syncUser
+      );
+
+      window.removeEventListener(
+        "focus",
+        syncUser
+      );
+    };
+  }, []);
+
+  /* =========================
+      FETCH CATEGORIES
+  ========================= */
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const products = await getProducts();
+        const products =
+          await getProducts();
 
         const uniqueCategories = [
           ...new Set(
@@ -46,7 +97,9 @@ function Navbar() {
               product.category
                 ? product.category
                     .split(",")
-                    .map((c) => c.trim())
+                    .map((c) =>
+                      c.trim()
+                    )
                 : []
             )
           ),
@@ -64,20 +117,28 @@ function Navbar() {
     fetchProducts();
   }, []);
 
+  /* =========================
+      SEARCH HANDLER
+  ========================= */
+
   const handleSearch = () => {
     const params =
       new URLSearchParams();
 
-    if (searchInput.trim()) {
+    const keyword =
+      searchInput.trim();
+
+    if (keyword) {
       params.set(
         "search",
-        searchInput.trim()
+        keyword
       );
     }
 
     if (
+      selectedCategory &&
       selectedCategory !==
-      "All category"
+        "All category"
     ) {
       params.set(
         "category",
@@ -88,8 +149,91 @@ function Navbar() {
     navigate(
       `/products?${params.toString()}`
     );
+
+    setMobileMenuOpen(false);
   };
 
+  /* =========================
+      SEARCH ON ENTER
+  ========================= */
+
+  const handleSearchKeyDown = (
+    e
+  ) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
+  /* =========================
+      MOBILE CATEGORY SELECT
+  ========================= */
+
+  const handleMobileCategoryClick = (
+    category
+  ) => {
+    setSelectedCategory(category);
+
+    const params =
+      new URLSearchParams();
+
+    if (
+      category !==
+      "All category"
+    ) {
+      params.set(
+        "category",
+        category
+      );
+    }
+
+    if (searchInput.trim()) {
+      params.set(
+        "search",
+        searchInput.trim()
+      );
+    }
+
+    navigate(
+      `/products?${params.toString()}`
+    );
+  };
+
+  /* =========================
+      DRAWER CATEGORY CLICK
+  ========================= */
+
+  const handleDrawerCategoryClick = (
+    category
+  ) => {
+    setSelectedCategory(category);
+
+    const params =
+      new URLSearchParams();
+
+    if (
+      category !==
+      "All category"
+    ) {
+      params.set(
+        "category",
+        category
+      );
+    }
+
+    if (searchInput.trim()) {
+      params.set(
+        "search",
+        searchInput.trim()
+      );
+    }
+
+    navigate(
+      `/products?${params.toString()}`
+    );
+
+    setMobileMenuOpen(false);
+  };
 
   return (
     <>
@@ -185,10 +329,29 @@ function Navbar() {
 
             {/* Desktop Actions */}
             <div className="hidden lg:flex items-center gap-7 text-[#8B96A5]">
-              <button className="flex flex-col items-center gap-1 text-[12px]">
-                <User size={20} strokeWidth={1.8} />
-                <span>Profile</span>
-              </button>
+              <Link
+  to={
+    userInfo
+      ? "/profile"
+      : "/login"
+  }
+    className={`flex flex-col items-center gap-1 text-[12px] hover:text-[#0D6EFD] ${
+    userInfo
+      ? "text-[#0D6EFD]"
+      : ""
+  }`}
+>
+  <User
+    size={20}
+    strokeWidth={1.8}
+  />
+
+<span>
+  {userInfo
+    ? userInfo.name.split(" ")[0]
+    : "Profile"}
+</span>
+</Link>
 
               <button className="flex flex-col items-center gap-1 text-[12px]">
                 <MessageSquare
@@ -198,13 +361,16 @@ function Navbar() {
                 <span>Message</span>
               </button>
 
-              <button className="flex flex-col items-center gap-1 text-[12px]">
-                <Heart
-                  size={20}
-                  strokeWidth={1.8}
-                />
-                <span>Orders</span>
-              </button>
+             <Link
+  to="/orders"
+  className="flex flex-col items-center gap-1 text-[12px]"
+>
+  <Heart
+    size={20}
+    strokeWidth={1.8}
+  />
+  <span>Orders</span>
+</Link>
 
               <Link
                 to="/cart"
@@ -218,55 +384,133 @@ function Navbar() {
               </Link>
             </div>
 
-            {/* Mobile Right Icons */}
-            <div className="flex items-center gap-5 md:hidden">
-              <Link to="/cart">
-                <ShoppingCart size={24} />
-              </Link>
+ {/* =========================
+    MOBILE RIGHT ICONS
+========================= */}
+<div className="flex items-center gap-5 md:hidden">
+  <Link
+    to="/cart"
+    className="hover:text-[#0D6EFD]"
+  >
+    <ShoppingCart size={24} />
+  </Link>
 
-              <User size={24} />
-            </div>
+  <Link
+    to={
+      userInfo
+        ? "/profile"
+        : "/login"
+    }
+    className="hover:text-[#0D6EFD]"
+  >
+    <User size={24} />
+  </Link>
+</div>
           </div>
         </div>
 
-        {/* Mobile Search */}
-        <div className="md:hidden px-4 py-3 bg-white">
-          <div className="relative">
-            <Search
-              size={20}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8B96A5]"
-            />
+{/* =========================
+    MOBILE SEARCH
+========================= */}
+<div className="md:hidden px-4 py-3 bg-white">
 
-            <input
-              type="text"
-              placeholder="Search"
-              className="w-full h-[44px] rounded-md border border-[#DEE2E7] pl-12 pr-4 outline-none text-[16px]"
-            />
-          </div>
+  {/* Search */}
+  <div className="relative">
 
-          {/* Mobile Category Chips */}
-          <div className="flex gap-2 mt-3 overflow-x-auto scrollbar-hide pb-1">
-            <button className="whitespace-nowrap px-4 h-[34px] rounded-full bg-[#EFF2F4] text-[13px] text-[#0D6EFD]">
-              All category
-            </button>
+    <button
+      onClick={handleSearch}
+      className="
+        absolute
+        left-4
+        top-1/2
+        -translate-y-1/2
+        text-[#8B96A5]
+      "
+    >
+      <Search size={20} />
+    </button>
 
-            <button className="whitespace-nowrap px-4 h-[34px] rounded-full bg-[#EFF2F4] text-[13px]">
-              Gadgets
-            </button>
+    <input
+      type="text"
+      placeholder="Search"
 
-            <button className="whitespace-nowrap px-4 h-[34px] rounded-full bg-[#EFF2F4] text-[13px]">
-              Clothes
-            </button>
+      value={searchInput}
 
-            <button className="whitespace-nowrap px-4 h-[34px] rounded-full bg-[#EFF2F4] text-[13px]">
-              Electronics
-            </button>
+      onChange={(e) =>
+        setSearchInput(
+          e.target.value
+        )
+      }
 
-            <button className="whitespace-nowrap px-4 h-[34px] rounded-full bg-[#EFF2F4] text-[13px]">
-              Home
-            </button>
-          </div>
-        </div>
+      onKeyDown={
+        handleSearchKeyDown
+      }
+
+      className="
+        w-full
+        h-[44px]
+        rounded-md
+        border
+        border-[#DEE2E7]
+        pl-12
+        pr-4
+        outline-none
+        text-[16px]
+      "
+    />
+
+  </div>
+
+  {/* =========================
+      MOBILE CATEGORY CHIPS
+  ========================= */}
+
+  <div
+    className="
+      flex
+      gap-2
+      mt-3
+      overflow-x-auto
+      scrollbar-hide
+      pb-1
+    "
+  >
+
+    {categories.map((category) => (
+
+      <button
+        key={category}
+
+        onClick={() =>
+          handleMobileCategoryClick(
+            category
+          )
+        }
+
+        className={`
+          whitespace-nowrap
+          px-4
+          h-[34px]
+          rounded-full
+          text-[13px]
+          transition
+
+          ${
+            selectedCategory ===
+            category
+              ? "bg-[#0D6EFD] text-white"
+              : "bg-[#EFF2F4] text-[#0D6EFD]"
+          }
+        `}
+      >
+        {category}
+      </button>
+
+    ))}
+
+  </div>
+
+</div>
 
         {/* Desktop Bottom Navigation */}
         <div className="hidden md:block bg-white">
@@ -339,48 +583,88 @@ function Navbar() {
         </div>
       </header>
 
-      {/* Mobile Category Drawer */}
-      {mobileMenuOpen && (
-        <>
-          <div
-            className="fixed inset-0 bg-black/40 z-40 md:hidden"
+  {/* =========================
+    MOBILE CATEGORY DRAWER
+========================= */}
+{mobileMenuOpen && (
+  <>
+    {/* Overlay */}
+    <div
+      className="fixed inset-0 bg-black/40 z-40 md:hidden"
+      onClick={() =>
+        setMobileMenuOpen(false)
+      }
+    />
+
+    {/* Drawer */}
+    <div
+      className="
+        fixed
+        top-0
+        left-0
+        w-[280px]
+        h-screen
+        bg-white
+        z-50
+        md:hidden
+        overflow-y-auto
+      "
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b">
+
+        <h2 className="font-semibold text-lg">
+          Categories
+        </h2>
+
+        <button
+          onClick={() =>
+            setMobileMenuOpen(false)
+          }
+        >
+          <X size={24} />
+        </button>
+
+      </div>
+
+      {/* Categories */}
+      <div className="py-2">
+
+        {categories.map((category) => (
+
+          <button
+            key={category}
+
             onClick={() =>
-              setMobileMenuOpen(false)
+              handleDrawerCategoryClick(
+                category
+              )
             }
-          />
 
-          <div className="fixed top-0 left-0 w-[280px] h-screen bg-white z-50 md:hidden overflow-y-auto">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="font-semibold text-lg">
-                Categories
-              </h2>
+            className={`
+              w-full
+              text-left
+              px-5
+              py-3
+              transition-colors
 
-              <button
-                onClick={() =>
-                  setMobileMenuOpen(false)
-                }
-              >
-                <X size={24} />
-              </button>
-            </div>
+              ${
+                selectedCategory === category
+                  ? "bg-[#0D6EFD] text-white"
+                  : "text-[#1C1C1C] hover:bg-[#F7FAFC]"
+              }
+            `}
+          >
+            {category}
+          </button>
 
-            <div className="py-2">
-              {categories.map((category) => (
-                <Link
-                  key={category}
-                  to="/products"
-                  onClick={() =>
-                    setMobileMenuOpen(false)
-                  }
-                  className="block px-5 py-3 text-[#1C1C1C] hover:bg-[#F7FAFC]"
-                >
-                  {category}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
+        ))}
+
+      </div>
+
+    </div>
+  </>
+)}
     </>
   );
 }
