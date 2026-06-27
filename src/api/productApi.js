@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://ecommerce-fullstack-design-production-a246.up.railway.app";
+const API_URL = "https://ecommerce-fullstack-design-production-a246.up.railway.app";
 
 export const getProducts = async () => {
   const { data } = await axios.get(API_URL);
