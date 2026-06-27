@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API =
-  "http://localhost:5000/api/orders";
+  "http://ecommerce-fullstack-design-production-a246.up.railway.app";
 
 const getAuthConfig = () => {
   const userInfo = JSON.parse(
