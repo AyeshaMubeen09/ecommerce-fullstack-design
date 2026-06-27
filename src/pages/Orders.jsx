@@ -5,7 +5,10 @@ import {
 } from "react";
 
 import { getMyOrders } from "../api/orderApi";
-import { Link } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
 import { ArrowLeft, Search, Filter } from "lucide-react";
 
 import MainLayout from "../layouts/MainLayout";
@@ -21,38 +24,33 @@ function Orders() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [sortBy, setSortBy] = useState("newest");
+  const navigate = useNavigate();
 
   /* =====================================
       LOAD ORDERS
   ===================================== */
 useEffect(() => {
-  const userInfo = JSON.parse(
-    localStorage.getItem("userInfo")
-  );
-
-  if (!userInfo?.token) {
-    navigate("/login");
-    return;
-  }
-
-  fetchOrders();
-}, []);
-
-useEffect(() => {
   const fetchOrders = async () => {
-    try {
-      const data =
-        await getMyOrders();
+    const userInfo = JSON.parse(
+      localStorage.getItem("userInfo")
+    );
 
+    if (!userInfo?.token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const data = await getMyOrders();
       setOrders(data);
     } catch (error) {
-      console.error(error);
+      console.error("Orders Error:", error);
       setOrders([]);
     }
   };
 
   fetchOrders();
-}, []);
+}, [navigate]);
 
   /* =====================================
       FILTERED ORDERS
