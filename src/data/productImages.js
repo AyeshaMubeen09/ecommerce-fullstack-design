@@ -123,7 +123,25 @@ const productImages = {
 };
 
 export const getProductImage = (image) => {
-  return productImages[image] || image;
+  if (!image) {
+    return "/placeholder.png";
+  }
+
+  // External image (Pinterest, Unsplash, Cloudinary, etc.)
+  if (
+    image.startsWith("http://") ||
+    image.startsWith("https://")
+  ) {
+    return image;
+  }
+
+  // Local imported image
+  if (productImages[image]) {
+    return productImages[image];
+  }
+
+  // Public folder image
+  return `/${image}`;
 };
 
 export default productImages;

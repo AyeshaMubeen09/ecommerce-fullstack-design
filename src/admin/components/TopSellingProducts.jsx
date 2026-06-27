@@ -4,6 +4,10 @@ import {
 } from "lucide-react";
 
 import { Link } from "react-router-dom";
+import productImages, {
+  getProductImage,
+} from "../../data/productImages";
+
 
 import {
   getBestSellingProducts,
@@ -86,16 +90,16 @@ function TopSellingProducts({
             <div className="flex items-center gap-4">
 
               <img
-                src={`/src/assets/Final assets/${product.image}`}
-                alt={product.name}
-                className="
-                  w-16
-                  h-16
-                  rounded-xl
-                  object-cover
-                  border
-                "
-              />
+  src={getProductImage(product.image)}
+  alt={product.name}
+  className="
+    w-16
+    h-16
+    rounded-xl
+    object-cover
+    border
+  "
+/>
 
               <div>
 
